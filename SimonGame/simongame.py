@@ -1,3 +1,5 @@
+# @author Seth Stemen
+# The classic "Simon Says Game", now with 64 buttons instead of 4 :)
 import sys
 import random as rand
 from pygame import time
