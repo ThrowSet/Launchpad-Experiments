@@ -143,17 +143,18 @@ def main():
                         buttonPush.clear()
                         lp.Reset()
                         previousButtons.clear()
+                        break
                     elif pressedX == 8 and pressedY == 2:
                         # End gameplay
                         buttonDetected = True
                         superGamePlay = False
                         buttonPush.clear()
                         lp.LedCtrlString("Goodbye!", 0, 63, 0, -1, waitms=20)
+                        break
 
     # Close launchpad
     lp.Reset()
     lp.Close()
-
 
 
 # Computes the hashCode for a button press given an X,Y coordinate for a button press.
@@ -167,6 +168,7 @@ def hashcode(x, y):
     else:
         # Must be in quadrant 2 or 4
         return 120 if y < 5 else 80
+
 
 if __name__ == '__main__':
     main()
