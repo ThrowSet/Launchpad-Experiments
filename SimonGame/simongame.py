@@ -27,7 +27,7 @@ def main():
 
     # Display welcome message
     lp.ButtonFlush()
-    lp.LedCtrlString("Simon Game", 0, 63, 0, -1, waitms=25)
+    lp.LedCtrlString("Simon Game", 0, 63, 0, -1, waitms=10)
 
     # Initial setup for SimonGame
     previousButtons = list(())
@@ -62,7 +62,7 @@ def main():
             lp.Reset()
 
         # Prompt for user turn
-        lp.LedCtrlFlashXYByCode(8,8, 64)
+        lp.LedCtrlFlashXYByCode(8,8, 3)
 
         # Get and store user input in userButtons
         buttonLength = len(previousButtons)
@@ -90,6 +90,7 @@ def main():
                         lp.Reset()
 
         lp.Reset()
+        lp.LedCtrlXYByCode(8, 8, 3)
         time.wait(500)
 
         # Verify that the user input matches the expected input
@@ -101,6 +102,10 @@ def main():
             # Check X and Y variables in both and verify that they match
             if expectedInput[0] == actualInput[0] and expectedInput[1] == actualInput[1]:
                 print("Valid")
+                lp.LedCtrlXYByCode(8, 8, 64)
+                time.wait(100)
+                lp.Reset()
+                time.wait(50)
             else:
                 # Incorrect input detected, user loses
                 print("Game Over!")
