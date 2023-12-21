@@ -7,6 +7,8 @@
 !/examples/*
 !/launchpad_py
 !/launchpad_py/*
+!ChessDisplay/*
+!ChessDisplay
 
 !README.md
 !README
