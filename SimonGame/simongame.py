@@ -27,7 +27,7 @@ def main():
 
     # Display welcome message
     lp.ButtonFlush()
-    lp.LedCtrlString("Simon Game", 0, 63, 0, -1, waitms=10)
+    lp.LedCtrlString("Simon Game", 0, 63, 0, -1, waitms=20)
 
     # Initial setup for SimonGame
     previousButtons = list(())
@@ -35,87 +35,120 @@ def main():
 
     time.wait(1000)
 
-    # Primary gameplay loop
-    goodGame = True
-    while goodGame:
-        userButtons.clear()
+    # Allow user to replay should they lose
+    superGamePlay = True
+    while superGamePlay:
 
-        # Generate new X,Y coordinate for next button press within playable matrix (Excluding X=8 and Y=0)
-        x = rand.randint(0, 7)
-        y = rand.randint(1, 8)
-        previousButtons.append([x, y])
+        # Primary gameplay loop
+        goodGame = True
+        while goodGame:
+            userButtons.clear()
 
-        # Play through all previous buttons that have been pushed, along with their corresponding button color
-        for i in previousButtons:
-            # Extract matrix coordinates from list
-            tempx = i[0]
-            tempy = i[1]
+            # Generate new X,Y coordinate for next button press within playable matrix (Excluding X=8 and Y=0)
+            x = rand.randint(0, 7)
+            y = rand.randint(1, 8)
+            previousButtons.append([x, y])
 
-            print("X: ", tempx, " Y: ", tempy)
+            # Play through all previous buttons that have been pushed, along with their corresponding button color
+            for i in previousButtons:
+                # Extract matrix coordinates from list
+                tempx = i[0]
+                tempy = i[1]
 
-            # Compute hashcode of button
-            colorcode = hashcode(tempx, tempy)
+                print("X: ", tempx, " Y: ", tempy)
 
-            # Play button on launchpad
-            lp.LedCtrlXYByCode(tempx, tempy, colorcode)
-            time.wait(500)
+                # Compute hashcode of button
+                colorcode = hashcode(tempx, tempy)
+
+                # Play button on launchpad
+                lp.LedCtrlXYByCode(tempx, tempy, colorcode)
+                time.wait(500)
+                lp.Reset()
+
+            # Prompt for user turn
+            lp.LedCtrlFlashXYByCode(8,8, 3)
+
+            # Get and store user input in userButtons
+            buttonLength = len(previousButtons)
+            c = 0
+            while c < buttonLength:
+                buttonDetected = False
+                while not buttonDetected:
+                    buttonPush = lp.ButtonStateXY()
+
+                    if len(buttonPush) != 0:
+                        if buttonPush[2] != 127:
+                            pressedX = buttonPush[0]
+                            pressedY = buttonPush[1]
+
+                            colorcode = hashcode(pressedX, pressedY)
+
+                            lp.LedCtrlXYByCode(pressedX, pressedY, colorcode)
+
+                            time.wait(300)
+
+                            userButtons.append([buttonPush[0], buttonPush[1]])
+                            buttonDetected = True
+                            buttonPush.clear()
+                            c += 1
+                            lp.Reset()
+
             lp.Reset()
+            lp.LedCtrlXYByCode(8, 8, 3)
+            time.wait(500)
 
-        # Prompt for user turn
-        lp.LedCtrlFlashXYByCode(8,8, 3)
+            # Verify that the user input matches the expected input
+            c = 0
+            while c < buttonLength:
+                expectedInput = previousButtons[c]
+                actualInput = userButtons[c]
 
-        # Get and store user input in userButtons
-        buttonLength = len(previousButtons)
-        c = 0
-        while c < buttonLength:
-            buttonDetected = False
-            while not buttonDetected:
-                buttonPush = lp.ButtonStateXY()
+                # Check X and Y variables in both and verify that they match
+                if expectedInput[0] == actualInput[0] and expectedInput[1] == actualInput[1]:
+                    print("Valid")
+                    lp.LedCtrlXYByCode(8, 8, 64)
+                    time.wait(100)
+                    lp.Reset()
+                    time.wait(50)
+                else:
+                    # Incorrect input detected, user loses
+                    print("Game Over!")
+                    lp.LedAllOn(72)
+                    goodGame = False
 
-                if len(buttonPush) != 0:
-                    if buttonPush[2] != 127:
-                        pressedX = buttonPush[0]
-                        pressedY = buttonPush[1]
+                    time.wait(1000)
 
-                        colorcode = hashcode(pressedX, pressedY)
+                    break
+                c += 1
 
-                        lp.LedCtrlXYByCode(pressedX, pressedY, colorcode)
+        # Prompt for playing again
+        lp.Reset()
+        lp.LedCtrlString("Play Again?", 0, 63, 0, -1, waitms=20)
 
-                        time.wait(300)
+        lp.LedCtrlPulseXYByCode(8, 1, 64)
+        lp.LedCtrlPulseXYByCode(8, 2, 72)
 
-                        userButtons.append([buttonPush[0], buttonPush[1]])
+        buttonDetected = False
+        while not buttonDetected:
+            buttonPush = lp.ButtonStateXY()
+
+            if len(buttonPush) != 0:
+                if buttonPush[2] != 127:
+                    pressedX = buttonPush[0]
+                    pressedY = buttonPush[1]
+
+                    if pressedX == 8 and pressedY == 1:
+                        # Continue gameplay
                         buttonDetected = True
                         buttonPush.clear()
-                        c += 1
                         lp.Reset()
-
-        lp.Reset()
-        lp.LedCtrlXYByCode(8, 8, 3)
-        time.wait(500)
-
-        # Verify that the user input matches the expected input
-        c = 0
-        while c < buttonLength:
-            expectedInput = previousButtons[c]
-            actualInput = userButtons[c]
-
-            # Check X and Y variables in both and verify that they match
-            if expectedInput[0] == actualInput[0] and expectedInput[1] == actualInput[1]:
-                print("Valid")
-                lp.LedCtrlXYByCode(8, 8, 64)
-                time.wait(100)
-                lp.Reset()
-                time.wait(50)
-            else:
-                # Incorrect input detected, user loses
-                print("Game Over!")
-                lp.LedAllOn(72)
-                goodGame = False
-
-                time.wait(1000)
-
-                break
-            c += 1
+                        previousButtons.clear()
+                    elif pressedX == 8 and pressedY == 2:
+                        # End gameplay
+                        buttonDetected = True
+                        superGamePlay = False
+                        buttonPush.clear()
+                        lp.LedCtrlString("Goodbye!", 0, 63, 0, -1, waitms=20)
 
     # Close launchpad
     lp.Reset()
