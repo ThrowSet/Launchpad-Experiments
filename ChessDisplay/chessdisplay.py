@@ -39,6 +39,22 @@ def main():
     ]
     print(legal_moves)
 
+    print(board.piece_at(chess.A1))
+    print(board.piece_at(chess.A8))
+    print(chess_to_launchpad(chess.square_name(chess.A8)))
+
+
+def chess_to_launchpad(space):
+    """
+    Given a space in chess notation, returns a list of <X,Y> coordinates to be used to control a launchpad.
+    Input should be two characters (ex: a6)
+    """
+
+    # Initialize axis definitions to be used during translation
+    xaxis = dict(a=0, b=1, c=2, d=3, e=4, f=5, g=6, h=7)
+    yaxis = [0, 8, 7, 6, 5, 4, 3, 2, 1]
+
+    return [xaxis[space[0]], yaxis[int(space[1])]]
 
 
 if __name__ == "__main__":
